@@ -66,6 +66,8 @@ pfc.h = [
     floor( max( pfc.tCLRT ) / ( 1 * pfc.dSamplingPeriod ) );
 ];
 
+pfc.futureSetpointFlag = 0;
+
 % Matrices
 pfc.Ad = model.a;
 pfc.Bd = model.b;
@@ -117,6 +119,7 @@ for cnt_basis = 1:pfc.basisFunctionOrder
         end
     end
 end
+
 
 %% Simulation
 sim( 'PFC_model' );

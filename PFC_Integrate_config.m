@@ -6,19 +6,17 @@ clear;
 % Sampling period (s)
 dSamplingPeriod = 0.01;
 
-%% Plant definition ( 2DOF spring-mass-damper system )
+%% Plant definition ( 2DOF mass-damper system )
 M1 = 1.0;
 M2 = 1.0;
-K1 = 1.0;
-K2 = 1.0;
 D1 = 1.0;
 D2 = 1.0;
 
 Ac = [
     0, 0, 1, 0;
     0, 0, 0, 1;
-    -(K1+K2)/M1, K2/M1, -(D1+D2)/M1, D2/M1;
-    K2/M2, -K2/M2, D2/M2, -D2/M2;
+    0, 0, -(D1+D2)/M1, D2/M1;
+    0, 0, D2/M2, -D2/M2;
 ];
 
 Bc = [
@@ -37,8 +35,19 @@ Dc = zeros( 2, 2 );
 
 plant = ss( Ac, Bc, Cc, Dc );
 
+%% Inner LQR design
+Q_lqr = diag( [ 1, 1, 1, 1 ] );
+R_lqr = diag( [ 1, 1 ] );
+gain_lqr = lqr( Ac, Bc, Q_lqr, R_lqr );
+
 %% Internal model definition
+% Without inner controller
 model = c2d( ss( Ac, Bc, Cc, Dc ), dSamplingPeriod );
+InnerFbFlag = 0;
+
+% With inner controller (LQR)
+% model = c2d( ss( Ac - Bc * gain_lqr, Bc, Cc, Dc ), dSamplingPeriod );
+% InnerFbFlag = 1;
 
 %% Controller defenition
 % Discrete time sampling period ( design parameter )
@@ -123,4 +132,4 @@ end
 
 
 %% Simulation
-sim( 'PFC_model' );
+sim( 'PFC_Integrate_model' );
